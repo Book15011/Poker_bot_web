@@ -32,6 +32,12 @@ It enumerates all 133,784,560 seven-card hands, compares the category counts aga
 
 This takes about 10 minutes on 12 cores and produces one bucket per hand per canonical board (suit symmetry reduces the boards to 1,755 flops, 16,432 turns and 134,459 rivers).
 
+The deep stacks (50bb and up) use a coarser turn and river abstraction, because their trees are about 10 times larger and finer buckets would stay under-sampled. The flop table comes out identical (`research/scripts/deep_chain.sh` checks this), so the one shipped flop table serves every depth:
+
+```bash
+./abstract gen 2000 1000 1000 12 data_deep
+```
+
 | Street | Buckets | Features | Distance |
 |---|---|---|---|
 | Preflop | 169 | Exact starting-hand classes | None needed |
@@ -90,6 +96,24 @@ gzip -9 bp_<depth>.bin
 
 Each probability is stored as a byte, rounded so each row sums to exactly 255. The export keeps only preflop and flop, because the browser solves the turn and river itself. That is what keeps the download small.
 
+## Step 5: train longer from a checkpoint
+
+The first deep-stack runs had about an hour each, and their convergence numbers showed it. The `resume` mode continues a run from its saved regrets and average strategy:
+
+```bash
+./train resume <depthBB> data_deep <checkpoint> <outDir> <threads> <minutes> [seed]
+```
+
+The warm-up phases of a fresh run (Linear CFR discounting, the delay before averaging and before pruning) belong to its start, so a resumed run skips them: it averages and prunes from the first iteration and never discounts.
+
+`research/scripts/deep_long.sh` runs this second stage on 12 threads: 200bb for 6 hours, then 100bb for 5 and 50bb for 2.5. After each depth it exports the tables, measures convergence with `br`, and plays the new blueprint against the first one inside the abstract game:
+
+```bash
+./train h2h <depthBB> data_deep <newCheckpoint> <oldCheckpoint> <threads> <samples>
+```
+
+`h2h` deals the same cards with the seats swapped (duplicate pairs) and reports the first blueprint's win rate in mbb/hand with its standard error. `research/scripts/long_bench.sh` then compares old and new in the real game (`research/bench/bp_compare.js`) and against Local Best Response. Results are in [BENCHMARKS.md](BENCHMARKS.md#training).
+
 ## The live solver
 
 ```bash
@@ -109,6 +133,10 @@ node baseline_check.js 2000 100                                     # hand-writt
 node expert_check.js <bpDir> <dataDir> 20 20 strong 2000 20 150 1   # Expert vs one opponent
 node lbr.js expert <bpDir> <dataDir> 100 100 2000 20 150 1          # Local Best Response
 node slumbot.js <bpDir> <dataDir> 5000 20 150 slumbot.jsonl 1       # Slumbot, over its public API
+node bp_compare.js <newDir> <oldDir> <dataDir> blueprint 100 100000 1  # one blueprint against another
+node turn_profile.js <bpDir> <dataDir> 200 300 1 80 400             # action frequencies by street
+python slumbot_actions.py slumbot_*.jsonl                           # where the Slumbot chips went
+python ../scripts/make_figures.py                                   # redraw docs/figures
 ```
 
 ## What stays out of the repository
