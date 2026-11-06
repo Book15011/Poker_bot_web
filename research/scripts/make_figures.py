@@ -31,6 +31,7 @@ THEMES = {
 PX = 0.75  # points per CSS pixel
 FONT_STACK = "'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
 
+plt.rcParams['svg.hashsalt'] = 'poker-figures'  # stable ids, so a redraw changes only what changed
 plt.rcParams.update({
     'font.family': ['Segoe UI', 'DejaVu Sans'],
     'font.size': 10.5,
@@ -38,6 +39,11 @@ plt.rcParams.update({
     'axes.spines.top': False,
     'axes.spines.right': False,
 })
+
+
+def signed(v, fmt):
+    """A number with an explicit sign and a true minus sign."""
+    return format(v, '+' + fmt).replace('-', '−')
 
 
 def frame(t, w=7.6, h=4.3):
@@ -145,7 +151,7 @@ def head_to_head():
                     solid_capstyle='round', zorder=2)
             ax.plot([r['value']], [i], 'o', color=c, markersize=9 * PX, markeredgecolor=t['surface'],
                     markeredgewidth=2 * PX, zorder=3)
-            ax.text(r['value'] + r['ci'] + 4, i, f"{r['value']:+.1f}", va='center', fontsize=9, color=t['ink2'])
+            ax.text(r['value'] + r['ci'] + 4, i, signed(r['value'], '.1f'), va='center', fontsize=9, color=t['ink2'])
         ax.axvline(0, color=t['ink2'], linewidth=1.5 * PX)
         ax.set_yticks(range(len(rows)))
         ax.set_yticklabels([r['label'] for r in rows], color=t['ink'])
@@ -185,9 +191,9 @@ def slumbot():
             (h,) = ax.plot(xs, ys, color=t['series'][i], linewidth=2 * PX, label=label)
             handles.append(h)
             rate = ys[-1] / len(xs) * 100
-            ax.text(xs[-1] * 1.015, ys[-1], f'{rate:+.1f} bb/100\n{len(xs):,} hands', va='center', ha='left',
+            ax.text(xs[-1] * 1.015, ys[-1], f'{signed(rate, ".1f")} bb/100\n{len(xs):,} hands', va='center', ha='left',
                     fontsize=9, color=t['ink'])
-        ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f'{v:+,.0f}' if v else '0'))
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: signed(v, ',.0f') if v else '0'))
         ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f'{v:,.0f}'))
         ax.set_xlabel('Hands played', color=t['ink2'])
         ax.set_ylabel('Cumulative big blinds won', color=t['ink2'])

@@ -110,13 +110,14 @@ if os.path.exists(sp):
             'The all-in adjusted rows score hands where both players were all-in before the river at their expected value over the '
             'remaining cards, a standard way to remove some of the luck. They use the same hands.')
     if len(matches) > 1:
-        text += (' The first match used 20 turn solve iterations, which turned out to leave the Expert betting the turn far too often. '
-                 'The rematch used 300 iterations and the longer-trained 200bb blueprint, so it reflects both fixes together.')
+        text += (' The first match solved the turn for 20 iterations and the river for 150, which turned out to leave the Expert '
+                 'betting the turn far too often. The rematch used 300 and 600, the most the site runs while you take your time, '
+                 'and the longer-trained 200bb blueprint, so it reflects both fixes together.')
     sections.append({
         'title': 'Slumbot: the independent test',
         'text': text,
         'table': {'headers': ['Match and scoring', '#Hands', '#bb/100', '#95% CI', '#mbb/hand'], 'rows': rows},
-        'note': 'For scale, published results against Slumbot include ReBeL at +45 ± 5 mbb/hand and Modicum at +11 ± 5, both over far larger samples. A sample this size cannot separate results that close.',
+        'note': 'For scale, published wins against Slumbot run from Modicum at +11 ± 5 mbb/hand and ReBeL at +45 ± 5 to Supremus at +176 ± 44, all over far larger samples and with far more compute. A true edge as large as the rematch result would be surprising, so the real margin is most likely smaller. The fair reading is that the Expert now holds its own against Slumbot, not that it is stronger.',
     })
 
 # Local Best Response. A run stopped early has no final line, so its last progress line is used and marked.

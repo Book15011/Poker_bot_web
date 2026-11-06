@@ -4,11 +4,11 @@ Every number here was measured. Raw results are in [`research/results/`](../rese
 
 ## Summary
 
-185,178 hands were evaluated: 68,678 head-to-head, 112,000 against Local Best Response and 4,500 against Slumbot.
+191,178 hands were evaluated: 68,678 head-to-head, 112,000 against Local Best Response and 10,500 against Slumbot.
 
 - **Against the hand-written bots, the Expert wins, significantly at 20bb**: +21.5 ± 13.1 bb/100 against the Competitive bot on the site, and +18.1 ± 10.3 against Tight-passive. At 100bb every result is positive, but most intervals are still too wide.
 - **Local Best Response never beat it.** At 100bb and 200bb the Expert did measurably better against LBR than the same blueprint without live solving. That is the clearest evidence the solver earns its place: it makes the bot more robust, more than it wins extra chips from these opponents.
-- **Against Slumbot it lost: −35.5 ± 50.6 bb/100 over 4,500 hands.** The interval includes zero, but the most likely reading is that Slumbot is stronger. Slumbot took about 250,000 core hours to compute; this project's training used about 55 (253 minutes on 12 threads, plus card abstraction).
+- **Against Slumbot it lost the first match and won the rematch.** The first match went −35.5 ± 50.6 bb/100 over 4,500 hands. The logs showed the Expert betting the turn twice as often as it should, which traced back to short turn solves. After that fix and a longer 200bb training run, the rematch went +45.7 ± 47.1 over 6,000 hands. That interval only just reaches zero, and Slumbot is a much more heavily trained bot, so the fair reading is that the Expert now holds its own, not that it is clearly stronger. Slumbot took about 250,000 core hours to compute; this project's training has used about 190 so far.
 
 ## Setup
 
@@ -115,22 +115,46 @@ Deep stacks swing much more, and live solving is slower, so these samples are sm
 
 ## Slumbot
 
-[Slumbot](https://slumbot.com) won the 2018 Annual Computer Poker Competition. Its authors report about 250,000 core hours and 2 TB of RAM to compute it. It plays 200bb deep through a public API, so this is the one test against a strong bot I didn't write. Three sessions of 1,500 hands ran one request at a time (`research/bench/slumbot.js`). The Expert used its 200bb blueprint for preflop and flop, and live solving after that.
+[Slumbot](https://slumbot.com) won the 2018 Annual Computer Poker Competition. Its authors report about 250,000 core hours and 2 TB of RAM to compute it. It plays 200bb deep through a public API, so this is the one test against a strong bot I didn't write. Each session plays one request at a time (`research/bench/slumbot.js`). The Expert uses its 200bb blueprint for preflop and flop, and live solving after that.
 
-| Scoring | Hands | bb/100 | 95% CI | mbb/hand |
+There were two matches:
+
+- **First match**, 3 sessions of 1,500 hands: the first 200bb blueprint (1.0 billion iterations), with 20 turn and 150 river solve iterations.
+- **Rematch**, 3 sessions of 2,000 hands (`research/scripts/slumbot_rematch.sh`): the longer-trained 200bb blueprint (10.7 billion iterations, see [Training](#training)), with 300 turn and 600 river iterations. That is the most the site runs while you take your time to act.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="figures/slumbot-dark.svg">
+  <img src="figures/slumbot-light.svg" alt="Line chart of the Expert's cumulative big blinds against Slumbot, by hands played. The first match drifts down to about minus 2,300 big blinds by hand 3,000 and ends at minus 1,600 after 4,500 hands, minus 35.5 bb/100. The rematch climbs fairly steadily to about plus 3,300 by hand 5,600 and ends at plus 2,700 after 6,000 hands, plus 45.7 bb/100.">
+</picture>
+
+| Match | Scoring | Hands | bb/100 | 95% CI | mbb/hand |
+|---|---|---|---|---|---|
+| First | Raw chips | 4,500 | −35.5 | ±50.6 | −355 |
+| First | All-in adjusted (12 hands) | 4,500 | −44.2 | ±47.8 | −442 |
+| Rematch | Raw chips | 6,000 | +45.7 | ±47.1 | +457 |
+| Rematch | All-in adjusted (10 hands) | 6,000 | +49.3 | ±44.6 | +493 |
+
+The all-in adjusted rows score hands where both players were all-in before the river at their expected value over the remaining cards. That is a standard way to remove some luck, and it uses the same hands. The sessions show how noisy deep-stacked hands are: +22, −557 and −531 mbb/hand in the first match, and +739, −204 and +835 in the rematch. Each match's sessions ran side by side, so the chart interleaves them hand by hand.
+
+| Street | First match: Expert | First match: Slumbot | Rematch: Expert | Rematch: Slumbot |
 |---|---|---|---|---|
-| Raw chips | 4,500 | −35.5 | ±50.6 | −355 |
-| All-in adjusted | 4,500 | −44.2 | ±47.8 | −442 |
+| Preflop | 42.4% | 54.3% | 47.0% | 52.6% |
+| Flop | 36.0% | 26.0% | 27.2% | 28.9% |
+| Turn | 51.8% | 21.4% | 27.7% | 26.9% |
+| River | 31.8% | 27.4% | 32.3% | 30.4% |
 
-The all-in adjusted row scores the 12 hands where both players were all-in before the river at their expected value over the remaining cards. That is a standard way to remove some luck, and it uses the same hands. The sessions came out at +22, −557 and −531 mbb/hand, which shows how noisy 1,500 deep-stacked hands are.
+Share of each player's decisions that were bets or raises (`research/bench/slumbot_actions.py`). In the first match the Expert bet the flop and especially the turn far more often than Slumbot. In the rematch it is close on every street. The hands that ended with an Expert turn raise or turn all-in cost 18.9 bb/100 in the first match, and 3.2 in the rematch.
 
-**Reading it honestly:** the Expert most likely loses to Slumbot. The interval runs from about −86 to +15 bb/100, so a small win can't be ruled out, but it would be a surprise. For scale, ReBeL beat Slumbot by 4.5 ± 0.5 bb/100 and Modicum by 1.1 ± 0.5, both with far more compute and far larger samples. The likely causes are the under-trained 200bb blueprint (see the training table) and the coarse deep-stack abstraction. The fixes are more training time and the potential-aware abstraction from [RESEARCH.md](RESEARCH.md).
+**Reading it honestly:**
 
-The hand logs also showed the Expert betting or raising far more often on the turn than Slumbot (51.8% of its turn decisions, against 21.4%). The next section traces that to the short turn solves used in this match (20 iterations).
+- The rematch is a win of 45.7 bb/100, but its interval runs from about −1 to +93, so it only just fails to rule out a loss. The all-in adjusted interval, from about +5 to +94, clears zero.
+- The difference between the two matches is about 2.3 standard errors, so the improvement itself is unlikely to be luck. The rematch changed two things at once, longer training and longer solves, so this test can't say how much each one contributed.
+- For scale, published wins against Slumbot run from 1.1 ± 0.5 bb/100 (Modicum) and 4.5 ± 0.5 (ReBeL) to 17.6 ± 4.4 (Supremus, over 150,000 hands), all with far more compute (see [RESEARCH.md](RESEARCH.md)). A true edge of 45 bb/100 would be surprising, and the real margin is most likely much smaller. The fair conclusion is that the Expert at these settings plays Slumbot about evenly, or better, not that it is a stronger bot.
+- On the site the Expert gets these iteration counts only while you think. When it acts first on the turn, it has its 1.5 s budget, about 60 iterations on a laptop, so the deployed bot is somewhat weaker than the one in the rematch. The site's games are also at most 100bb deep, so it never uses the 200bb blueprint; the 100bb and 50bb blueprints got the same longer training (see [Training](#training)).
 
 ## Turn aggression and solve length
 
-`research/bench/slumbot_actions.py` splits the Slumbot logs by street and by each hand's last aggressive action. Hands that ended with an Expert turn raise cost 9.9 bb/100, and turn all-ins another 9.0, out of the 35.5 lost. To test whether short solves cause the extra aggression, `research/bench/turn_profile.js` plays the Expert against the blueprint alone (duplicate deals, 300 pairs, 150 for the slowest run) and counts every action by street:
+`research/bench/slumbot_actions.py` splits the Slumbot logs by street and by each hand's last aggressive action. In the first match, hands that ended with an Expert turn raise cost 9.9 bb/100, and turn all-ins another 9.0, out of the 35.5 lost. To test whether short solves cause the extra aggression, `research/bench/turn_profile.js` plays the Expert against the blueprint alone (duplicate deals, 300 pairs, 150 for the slowest run) and counts every action by street:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="figures/turn_aggression-dark.svg">
@@ -151,7 +175,7 @@ River iterations were scaled with the turn (150, 400 and 600). Deep stacks need 
 
 The win rates against the blueprint don't show this: every interval includes zero. A passive, exploitable opponent may even pay off the extra bets, which is a reason to judge the fix on a strong opponent instead. The earlier head-to-head benchmarks used 30 to 40 turn iterations, so their Expert was also more aggressive than intended. They were not rerun.
 
-**What changed on the site.** The Expert now keeps solving while you decide, up to 300 turn and 600 river iterations, and answers from that solve if your action is in its tree (see [ARCHITECTURE.md](ARCHITECTURE.md#expert-turn-and-river)). When it acts first on the turn it still has its 1.5 s budget, about 60 iterations on a laptop.
+**What changed on the site.** The Expert now keeps solving while you decide, up to 300 turn and 600 river iterations, and answers from that solve if your action is in its tree (see [ARCHITECTURE.md](ARCHITECTURE.md#expert-turn-and-river)). When it acts first on the turn it still has its 1.5 s budget, about 60 iterations on a laptop. The [Slumbot rematch](#slumbot) used 300 and 600, and the Expert's turn aggression came down from 51.8% to 27.7%, in line with Slumbot's 26.9%.
 
 
 ## Training
@@ -226,7 +250,7 @@ A quick match downloads about 2.2 MB the first time a visitor plays Expert, and 
 
 ## Known limitations
 
-- The Expert most likely loses to Slumbot, an independent and much more heavily trained bot.
+- Against Slumbot, an independent and much more heavily trained bot, the rematch win (+45.7 ± 47.1 bb/100) is a small sample and only just clears zero after the all-in adjustment. It shows the Expert roughly holds its own, not that it is stronger.
 - Live solving shows no significant head-to-head gain over the blueprint alone. Its measured benefit is robustness against LBR.
 - The deep blueprints are under-trained, and that shows in the convergence estimates above.
 - 100bb head-to-head samples are small.

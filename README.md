@@ -19,13 +19,13 @@ Plain-language version: [AI_EXPLAINED.md](docs/AI_EXPLAINED.md). Design and code
 
 ## Results
 
-185,178 evaluated hands, with duplicate deals and 95% confidence intervals. All details and limitations are in [BENCHMARKS.md](docs/BENCHMARKS.md).
+191,178 evaluated hands, with duplicate deals and 95% confidence intervals. All details and limitations are in [BENCHMARKS.md](docs/BENCHMARKS.md).
 
 | Test | Result |
 |---|---|
 | Against the Competitive bot on the site, 20bb | +21.5 ± 13.1 bb/100 |
 | Local Best Response (an exploiter that knows the exact strategy) | Never found a positive exploit |
-| [Slumbot](https://slumbot.com), 2018 competition winner, 200bb | −35.5 ± 50.6 bb/100 over 4,500 hands |
+| [Slumbot](https://slumbot.com), 2018 competition winner, 200bb | Rematch: +45.7 ± 47.1 bb/100 over 6,000 hands (first match: −35.5 ± 50.6 over 4,500) |
 | Turn aggression, 200bb | 61% bets and raises at 20 solve iterations, 29% at 300 (trained tables: 24 to 29%) |
 
 <picture>
@@ -38,7 +38,12 @@ Plain-language version: [AI_EXPLAINED.md](docs/AI_EXPLAINED.md). Design and code
   <img src="docs/figures/turn_aggression-light.svg" alt="Line chart of the share of the Expert's turn decisions that were bets or raises, against turn solve iterations. At 200bb it falls from 61.5% at 20 iterations to 45.9% at 80 and 28.8% at 300. At 100bb it falls from 38.2% to 31.8%, and at 20bb from 30.6% to 26.7%. The trained tables' own rate is a band from about 22% to 29%.">
 </picture>
 
-Slumbot took about 250,000 core hours to compute. This project's first training run used about 55. The Slumbot loss led to the turn-aggression study, the think-time solving now on the site, and a longer deep-stack training run, documented in [BENCHMARKS.md](docs/BENCHMARKS.md#turn-aggression-and-solve-length) and [TRAINING.md](docs/TRAINING.md).
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/slumbot-dark.svg">
+  <img src="docs/figures/slumbot-light.svg" alt="Line chart of the Expert's cumulative big blinds against Slumbot. The first match ends at minus 1,600 big blinds after 4,500 hands, minus 35.5 bb/100. The rematch, after the fixes, ends at plus 2,700 after 6,000 hands, plus 45.7 bb/100.">
+</picture>
+
+The first Slumbot match was a loss. Its hand logs showed the Expert betting the turn twice as often as it should, which led to the turn-aggression study, the think-time solving now on the site, and a longer deep-stack training run. The rematch, with both fixes, was a win. Its interval only just reaches zero, and Slumbot took about 250,000 core hours to compute against this project's 190 or so, so read it as the Expert holding its own rather than being stronger. Details in [BENCHMARKS.md](docs/BENCHMARKS.md#slumbot).
 
 ## Repository layout
 
