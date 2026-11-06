@@ -36,6 +36,11 @@ None of these were used to train the Expert, which learned only from self-play. 
 
 This is the stack depth the quick match on the site starts at.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="figures/head_to_head_20bb-dark.svg">
+  <img src="figures/head_to_head_20bb-light.svg" alt="Dot plot of the Expert's win rate at 20bb against ten opponents, with 95% intervals. Every point estimate is positive, from +10.5 bb/100 against Blueprint only to +133.2 against Call station. The intervals for Blueprint only and Equity / pot odds cross zero; the rest clear it.">
+</picture>
+
 | Expert against | Hands | bb/100 | 95% CI |
 |---|---|---|---|
 | Blueprint only | 9,600 | +10.5 | ±16.7 |
@@ -126,6 +131,11 @@ The hand logs also showed the Expert betting or raising far more often on the tu
 ## Turn aggression and solve length
 
 `research/bench/slumbot_actions.py` splits the Slumbot logs by street and by each hand's last aggressive action. Hands that ended with an Expert turn raise cost 9.9 bb/100, and turn all-ins another 9.0, out of the 35.5 lost. To test whether short solves cause the extra aggression, `research/bench/turn_profile.js` plays the Expert against the blueprint alone (duplicate deals, 300 pairs, 150 for the slowest run) and counts every action by street:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="figures/turn_aggression-dark.svg">
+  <img src="figures/turn_aggression-light.svg" alt="Line chart of the share of the Expert's turn decisions that were bets or raises, against turn solve iterations. At 200bb it falls from 61.5% at 20 iterations to 45.9% at 80 and 28.8% at 300. At 100bb it falls from 38.2% to 31.8%, and at 20bb from 30.6% to 26.7%. The trained tables' own rate is a band from about 22% to 29%.">
+</picture>
 
 | Depth | Turn iterations | Expert: turn bets and raises | Blueprint: turn bets and raises | Expert vs blueprint (bb/100) |
 |---|---|---|---|---|
