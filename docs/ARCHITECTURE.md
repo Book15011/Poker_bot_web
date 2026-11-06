@@ -22,9 +22,11 @@ Browser
 
 ## Repository layout
 
+The project lives in two repositories. This one has the source, training, research and results. The [website repository](https://github.com/Book15011/Book15011.github.io) holds the portfolio, including `quant.html`, and a published copy of the game's runtime files (`poker/` without the tests), which `scripts/publish_site.py` refreshes.
+
 | Path | What it is |
 |---|---|
-| `quant.html` | Portfolio page. Adds a section and a floating button that open the game in a modal |
+| `quant.html` (website repository) | Portfolio page. Adds a section and a floating button that open the game in a modal |
 | `poker/index.html` | Full-page version of the game |
 | `poker/how-it-works.html` | Plain-language write-up with benchmark results |
 | `poker/js/engine/` | Rules engine and hand evaluator. No dependency on UI or AI |
@@ -36,6 +38,9 @@ Browser
 | `research/solver/` | C: the live solver, compiled to WebAssembly |
 | `research/bench/` | Benchmarks. These import the same JS that ships to the browser |
 | `research/e2e/` | Browser tests driving real Chrome |
+| `research/scripts/`, `research/results/` | Job runners and the report builder, and the raw results they produced |
+| `docs/` | These write-ups |
+| `scripts/publish_site.py` | Mirrors the game's runtime files into the website repository |
 
 There is no build step for the website. The site is plain HTML and CSS with hand-written ES modules, which matches how the rest of the portfolio works. JavaScript files carry JSDoc types and `// @ts-check`, so type checking stays available without adding a compiler to a static site. The one compiled artifact is `solver.wasm`, and its source and build script are in the repository.
 

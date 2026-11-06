@@ -1,0 +1,16 @@
+# Training outputs and data stay on the training machine (see docs/TRAINING.md)
+*.ckpt
+*.final
+research/trainer/train
+research/trainer/abstract
+/data/
+/data_deep/
+/ckpt/
+/exports/
+/logs/
+
+# Tooling
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
