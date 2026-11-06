@@ -91,17 +91,31 @@ if quick_groups:
 # Slumbot: summary written by research/bench/slumbot_report.js
 slumbot_summary = None
 sp = os.path.join(results_dir, 'slumbot_summary.json')
+rp = os.path.join(results_dir, 'slumbot_rematch', 'summary.json')
 if os.path.exists(sp):
-    sm = json.load(open(sp, encoding='utf-8'))
-    raw, adj = sm['raw'], sm['allInAdjusted']
-    slumbot_summary = {'hands': raw['hands'], 'bb100': raw['bb100'], 'ci': raw['ci95'], 'adj': adj['bb100'], 'adjCi': adj['ci95']}
+    matches = [('First match', json.load(open(sp, encoding='utf-8')))]
+    if os.path.exists(rp):
+        matches.append(('Rematch', json.load(open(rp, encoding='utf-8'))))
+    rows = []
+    for name, sm in matches:
+        raw, adj = sm['raw'], sm['allInAdjusted']
+        rows.append([f'{name}, raw chips', f"{raw['hands']:,}", f"{raw['bb100']:+.1f}", f"±{raw['ci95']:.1f}", f"{raw['bb100'] * 10:+.0f}"])
+        rows.append([f"{name}, all-in adjusted ({sm['handsAdjusted']:,} hands)", f"{adj['hands']:,}", f"{adj['bb100']:+.1f}", f"±{adj['ci95']:.1f}", f"{adj['bb100'] * 10:+.0f}"])
+    # The headline is the latest match, which is the bot as it stands now.
+    raw = matches[-1][1]['raw']
+    slumbot_summary = {'hands': raw['hands'], 'bb100': raw['bb100'], 'ci': raw['ci95'], 'name': matches[-1][0],
+                       'allHands': sum(sm['raw']['hands'] for _, sm in matches)}
+    text = ('Slumbot won the 2018 Annual Computer Poker Competition and has a public API. It is the only opponent here I did not write. '
+            'These matches are 200 big blinds deep with no duplicate deals, so variance is far higher than in the tables above. '
+            'The all-in adjusted rows score hands where both players were all-in before the river at their expected value over the '
+            'remaining cards, a standard way to remove some of the luck. They use the same hands.')
+    if len(matches) > 1:
+        text += (' The first match used 20 turn solve iterations, which turned out to leave the Expert betting the turn far too often. '
+                 'The rematch used 300 iterations and the longer-trained 200bb blueprint, so it reflects both fixes together.')
     sections.append({
         'title': 'Slumbot: the independent test',
-        'text': 'Slumbot won the 2018 Annual Computer Poker Competition and has a public API. It is the only opponent here I did not write. These matches are 200 big blinds deep with no duplicate deals, so variance is far higher than in the tables above. The second row scores hands where both players were all-in before the river at their expected value over the remaining cards, a standard way to remove some of the luck. It uses the same hands.',
-        'table': {'headers': ['Scoring', '#Hands', '#bb/100', '#95% CI', '#mbb/hand'], 'rows': [
-            ['Raw chips', f"{raw['hands']:,}", f"{raw['bb100']:+.1f}", f"±{raw['ci95']:.1f}", f"{raw['bb100'] * 10:+.0f}"],
-            [f"All-in adjusted ({sm['handsAdjusted']:,} hands)", f"{adj['hands']:,}", f"{adj['bb100']:+.1f}", f"±{adj['ci95']:.1f}", f"{adj['bb100'] * 10:+.0f}"],
-        ]},
+        'text': text,
+        'table': {'headers': ['Match and scoring', '#Hands', '#bb/100', '#95% CI', '#mbb/hand'], 'rows': rows},
         'note': 'For scale, published results against Slumbot include ReBeL at +45 ± 5 mbb/hand and Modicum at +11 ± 5, both over far larger samples. A sample this size cannot separate results that close.',
     })
 
@@ -148,10 +162,11 @@ sections.append({
 })
 
 perf_path = os.path.join(results_dir, 'perf.json')
-all_hands = total_hands + sum(r['hands'] for r in lbr) + (slumbot_summary['hands'] if slumbot_summary else 0)
+all_hands = total_hands + sum(r['hands'] for r in lbr) + (slumbot_summary['allHands'] if slumbot_summary else 0)
 tiles = [{'value': f'{all_hands:,}', 'label': 'hands evaluated: head-to-head, Local Best Response and Slumbot, all on the code the browser runs'}]
 if slumbot_summary:
-    tiles.append({'value': f"{slumbot_summary['bb100']:+.0f} ± {slumbot_summary['ci']:.0f}", 'label': f"bb/100 against Slumbot over {slumbot_summary['hands']:,} hands"})
+    which = ' in the rematch' if slumbot_summary['name'] == 'Rematch' else ''
+    tiles.append({'value': f"{slumbot_summary['bb100']:+.0f} ± {slumbot_summary['ci']:.0f}", 'label': f"bb/100 against Slumbot over {slumbot_summary['hands']:,} hands{which}"})
 tiles.append({'value': f'{(quick_bytes + solver_bytes) / 1048576:.1f} MB', 'label': 'download for a quick match, loaded only when you start'})
 if os.path.exists(perf_path):
     perf = json.load(open(perf_path, encoding='utf-8'))
