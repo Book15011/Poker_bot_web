@@ -1,0 +1,8 @@
+{
+ "note": "Abstract exploitability estimates (train br, 40M samples) and cumulative iterations. First run from docs/BENCHMARKS.md; longer run from research/results/training_long/deep_long.log. h2h is the longer blueprint against the first one inside the abstract game, mbb/hand with 1 standard error.",
+ "depths": [
+  {"depth": 50, "first": {"exploitability": 723, "iterationsB": 0.68, "minutes": 45}, "long": {"exploitability": 547.6, "iterationsB": 10.98, "minutes": 195}, "h2h": [31.76, 0.81]},
+  {"depth": 100, "first": {"exploitability": 924, "iterationsB": 1.27, "minutes": 60}, "long": {"exploitability": 822.3, "iterationsB": 14.82, "minutes": 360}, "h2h": [37.22, 1.10]},
+  {"depth": 200, "first": {"exploitability": 853, "iterationsB": 1.01, "minutes": 60}, "long": {"exploitability": 805.6, "iterationsB": 10.70, "minutes": 420}, "h2h": [62.95, 1.49]}
+ ]
+}

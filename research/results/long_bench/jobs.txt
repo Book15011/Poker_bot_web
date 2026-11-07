@@ -1,0 +1,13 @@
+bp_d50 node bp_compare.js /home/ubuntu/test/poker-ai/exports/long /home/ubuntu/test/poker-ai/exports /home/ubuntu/test/poker-ai/data_deep blueprint 50 100000 50
+bp_d100 node bp_compare.js /home/ubuntu/test/poker-ai/exports/long /home/ubuntu/test/poker-ai/exports /home/ubuntu/test/poker-ai/data_deep blueprint 100 100000 100
+bp_d200 node bp_compare.js /home/ubuntu/test/poker-ai/exports/long /home/ubuntu/test/poker-ai/exports /home/ubuntu/test/poker-ai/data_deep blueprint 200 100000 200
+expert_d100_s1 node bp_compare.js /home/ubuntu/test/poker-ai/exports/long /home/ubuntu/test/poker-ai/exports /home/ubuntu/test/poker-ai/data_deep expert 100 150 11 80 400
+expert_d100_s2 node bp_compare.js /home/ubuntu/test/poker-ai/exports/long /home/ubuntu/test/poker-ai/exports /home/ubuntu/test/poker-ai/data_deep expert 100 150 12 80 400
+expert_d100_s3 node bp_compare.js /home/ubuntu/test/poker-ai/exports/long /home/ubuntu/test/poker-ai/exports /home/ubuntu/test/poker-ai/data_deep expert 100 150 13 80 400
+expert_d100_s4 node bp_compare.js /home/ubuntu/test/poker-ai/exports/long /home/ubuntu/test/poker-ai/exports /home/ubuntu/test/poker-ai/data_deep expert 100 150 14 80 400
+lbr_new_d100_f2 node lbr.js blueprint /home/ubuntu/test/poker-ai/exports/long /home/ubuntu/test/poker-ai/data_deep 100 100 200000 0 0 16 2
+lbr_new_d100_f0 node lbr.js blueprint /home/ubuntu/test/poker-ai/exports/long /home/ubuntu/test/poker-ai/data_deep 100 100 200000 0 0 15 0
+lbr_new_d200_f2 node lbr.js blueprint /home/ubuntu/test/poker-ai/exports/long /home/ubuntu/test/poker-ai/data_deep 200 200 200000 0 0 19 2
+lbr_old_d100_f2 node lbr.js blueprint /home/ubuntu/test/poker-ai/exports /home/ubuntu/test/poker-ai/data_deep 100 100 200000 0 0 16 2
+lbr_old_d100_f0 node lbr.js blueprint /home/ubuntu/test/poker-ai/exports /home/ubuntu/test/poker-ai/data_deep 100 100 200000 0 0 15 0
+lbr_old_d200_f2 node lbr.js blueprint /home/ubuntu/test/poker-ai/exports /home/ubuntu/test/poker-ai/data_deep 200 200 200000 0 0 19 2

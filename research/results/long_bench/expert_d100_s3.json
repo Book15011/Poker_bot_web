@@ -1,0 +1,1 @@
+{"mode":"expert","depth":100,"pairs":150,"seed":13,"a":"/home/ubuntu/test/poker-ai/exports/long","b":"/home/ubuntu/test/poker-ai/exports","turnIters":80,"riverIters":400,"bb100":47.28333333333333,"ci95":135.9379406429817,"hands":300,"seconds":958.771}

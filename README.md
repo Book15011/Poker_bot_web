@@ -27,6 +27,7 @@ Plain-language version: [AI_EXPLAINED.md](docs/AI_EXPLAINED.md). Design and code
 | Local Best Response (an exploiter that knows the exact strategy) | Never found a positive exploit |
 | [Slumbot](https://slumbot.com), 2018 competition winner, 200bb | Rematch: +45.7 ± 47.1 bb/100 over 6,000 hands (first match: −35.5 ± 50.6 over 4,500) |
 | Turn aggression, 200bb | 61% bets and raises at 20 solve iterations, 29% at 300 (trained tables: 24 to 29%) |
+| Longer training, 100bb | New tables beat the first ones by +9.0 ± 7.5 bb/100 in real poker; convergence estimate 924 to 822 mbb/hand |
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/figures/head_to_head_20bb-dark.svg">
@@ -43,7 +44,7 @@ Plain-language version: [AI_EXPLAINED.md](docs/AI_EXPLAINED.md). Design and code
   <img src="docs/figures/slumbot-light.svg" alt="Line chart of the Expert's cumulative big blinds against Slumbot. The first match ends at minus 1,600 big blinds after 4,500 hands, minus 35.5 bb/100. The rematch, after the fixes, ends at plus 2,700 after 6,000 hands, plus 45.7 bb/100.">
 </picture>
 
-The first Slumbot match was a loss. Its hand logs showed the Expert betting the turn twice as often as it should, which led to the turn-aggression study, the think-time solving now on the site, and a longer deep-stack training run. The rematch, with both fixes, was a win. Its interval only just reaches zero, and Slumbot took about 250,000 core hours to compute against this project's 190 or so, so read it as the Expert holding its own rather than being stronger. Details in [BENCHMARKS.md](docs/BENCHMARKS.md#slumbot).
+The first Slumbot match was a loss. Its hand logs showed the Expert betting the turn twice as often as it should, which led to the turn-aggression study, the think-time solving now on the site, and a longer deep-stack training run. The rematch, with both fixes, was a win. Its interval only just reaches zero, and Slumbot took about 250,000 core hours to compute against this project's 220 or so, so read it as the Expert holding its own rather than being stronger. Details in [BENCHMARKS.md](docs/BENCHMARKS.md#slumbot).
 
 ## Repository layout
 

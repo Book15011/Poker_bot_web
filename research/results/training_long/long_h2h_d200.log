@@ -1,0 +1,5 @@
+boards(3): 22100 total, 1755 canonical
+boards(4): 270725 total, 16432 canonical
+boards(5): 2598960 total, 134459 canonical
+tree nodes=441762 decisions pre=124 flop=3880 turn=27744 river=134084 regrets=1.81GB avg=0.09GB
+A vs B: 62.95 mbb/hand +- 1.49 (1 s.e.), duplicate pairs

@@ -1,0 +1,7 @@
+boards(3): 22100 total, 1755 canonical
+boards(4): 270725 total, 16432 canonical
+boards(5): 2598960 total, 134459 canonical
+tree nodes=441762 decisions pre=124 flop=3880 turn=27744 river=134084 regrets=1.81GB avg=0.09GB
+  best response as player 0: 152.04 chips/hand
+  best response as player 1: 9.09 chips/hand
+iterations=10702.8M abstract_exploitability_estimate=805.6 mbb/hand (samples=40000000)

@@ -8,7 +8,8 @@ Every number here was measured. Raw results are in [`research/results/`](../rese
 
 - **Against the hand-written bots, the Expert wins, significantly at 20bb**: +21.5 ± 13.1 bb/100 against the Competitive bot on the site, and +18.1 ± 10.3 against Tight-passive. At 100bb every result is positive, but most intervals are still too wide.
 - **Local Best Response never beat it.** At 100bb and 200bb the Expert did measurably better against LBR than the same blueprint without live solving. That is the clearest evidence the solver earns its place: it makes the bot more robust, more than it wins extra chips from these opponents.
-- **Against Slumbot it lost the first match and won the rematch.** The first match went −35.5 ± 50.6 bb/100 over 4,500 hands. The logs showed the Expert betting the turn twice as often as it should, which traced back to short turn solves. After that fix and a longer 200bb training run, the rematch went +45.7 ± 47.1 over 6,000 hands. That interval only just reaches zero, and Slumbot is a much more heavily trained bot, so the fair reading is that the Expert now holds its own, not that it is clearly stronger. Slumbot took about 250,000 core hours to compute; this project's training has used about 190 so far.
+- **Longer training helped inside the abstract game, less in real poker.** The deep blueprints ran 11 to 16 times as many iterations. Their convergence estimates fell 6 to 24%, and each beats its predecessor in the abstract game. In real poker only the 100bb gain is measurable (+9.0 ± 7.5 bb/100), and Local Best Response finds no difference in robustness. The 100bb and 50bb tables on the site are now the longer-trained ones ([details](#longer-deep-stack-training)).
+- **Against Slumbot it lost the first match and won the rematch.** The first match went −35.5 ± 50.6 bb/100 over 4,500 hands. The logs showed the Expert betting the turn twice as often as it should, which traced back to short turn solves. After that fix and a longer 200bb training run, the rematch went +45.7 ± 47.1 over 6,000 hands. That interval only just reaches zero, and Slumbot is a much more heavily trained bot, so the fair reading is that the Expert now holds its own, not that it is clearly stronger. Slumbot took about 250,000 core hours to compute; this project's training has used about 220 in all.
 
 ## Setup
 
@@ -193,7 +194,43 @@ Blueprints were trained one stack depth at a time on 12 CPU threads. The exploit
 | 100bb | 2,000 / 1,000 / 1,000 | 60 | 1.27B | 924 |
 | 200bb | 2,000 / 1,000 / 1,000 | 60 | 1.01B | 853 |
 
-The deep blueprints are far less converged: their trees are 5 to 30 times larger, and they ran for about an hour each. That is the main reason the bot does live solving on the turn and river, and it is the clearest place to spend more compute. A 5-minute trial at 20bb measured 293 mbb/hand, against 134 after 30 minutes on a finer abstraction.
+The deep blueprints were far less converged: their trees are 5 to 30 times larger, and the first runs had about an hour each. That is the main reason the bot does live solving on the turn and river, and it was the clearest place to spend more compute. A 5-minute trial at 20bb measured 293 mbb/hand, against 134 after 30 minutes on a finer abstraction.
+
+### Longer deep-stack training
+
+`research/scripts/deep_long.sh` resumed the three deep blueprints from their checkpoints on 12 threads: 200bb for 6 more hours, 100bb for 5 and 50bb for 2.5 (see [TRAINING.md](TRAINING.md#step-5-train-longer-from-a-checkpoint)). Afterwards, `research/scripts/long_bench.sh` compared each new blueprint with the one it replaced. Raw results are in [`research/results/long_bench/`](../research/results/long_bench) and [`research/results/training_long/`](../research/results/training_long).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="figures/training-dark.svg">
+  <img src="figures/training-light.svg" alt="Dumbbell chart of the abstract exploitability estimate before and after the longer training. 50bb falls from 723 to 548 mbb/hand (0.7 to 11.0 billion iterations), 100bb from 924 to 822 (1.3 to 14.8 billion) and 200bb from 853 to 806 (1.0 to 10.7 billion).">
+</picture>
+
+| Depth | Minutes (first + longer) | Iterations | Abstract exploitability estimate (mbb/hand) | New vs first, abstract game (bb/100) | New vs first, real game, tables only (bb/100) |
+|---|---|---|---|---|---|
+| 50bb | 45 + 150 | 0.68B to 10.98B | 723 to 548 | +3.2 ± 0.2 | −1.4 ± 5.9 |
+| 100bb | 60 + 300 | 1.27B to 14.82B | 924 to 822 | +3.7 ± 0.2 | +9.0 ± 7.5 |
+| 200bb | 60 + 360 | 1.01B to 10.70B | 853 to 806 | +6.3 ± 0.3 | +7.3 ± 9.7 |
+
+The two head-to-head columns use duplicate deals. The abstract game is the one the blueprints were trained in (`train h2h`). The real game plays both sets of trained tables on every street in real No-Limit Hold'em, with the same bet translation as the site, over 200,000 hands per depth (`research/bench/bp_compare.js`). Intervals are 95%.
+
+Local Best Response, with the same seeds and ten times the hands of the first measurement. The numbers are the bot's win rate against LBR, so positive means the attack failed:
+
+| Blueprint | LBR plays from | Hands | First run (mbb/hand) | Longer run (mbb/hand) |
+|---|---|---|---|---|
+| 100bb | Preflop | 200,000 | +804 ± 118 | +642 ± 116 |
+| 100bb | Turn | 200,000 | +987 ± 117 | +961 ± 116 |
+| 200bb | Turn | 200,000 | +2,013 ± 182 | +1,918 ± 178 |
+
+The site's own configuration, the Expert with live solving (80 turn and 400 river iterations), new blueprint against old at 100bb, came out at −31.9 ± 87.6 bb/100 over 1,200 hands. That is far too few hands to say anything either way.
+
+**Reading it honestly:**
+
+- Inside the abstract game, the longer runs are clearly better. Every exploitability estimate fell, by 24% at 50bb, 11% at 100bb and 6% at 200bb, and every new blueprint beats the one it replaced by a margin many standard errors wide.
+- In real poker the gain is smaller and only partly visible. The new 100bb tables beat the old ones by 9.0 ± 7.5 bb/100, just outside noise. At 200bb the edge is similar but within noise, and at 50bb there is no measurable difference.
+- LBR still never wins against either version. It does slightly better against the new tables in all three settings, by 26 to 162 mbb/hand, but each difference is within the noise of the two runs. So this test shows no gain in robustness from the extra training, and no clear loss either.
+- One likely reason the real-game gains are small is the abstraction itself. With 1,000 turn and river buckets, more iterations converge toward the equilibrium of a coarse game, and the bot keeps that game's blind spots. The fixes in [RESEARCH.md](RESEARCH.md), a finer or potential-aware abstraction, matter more now than more iterations.
+
+**What changed on the site.** The 100bb and 50bb tables are now the longer-trained ones. The site's games never reach 200bb, so that blueprint is used only by the Slumbot benchmark.
 
 ## Solver quality and speed
 
@@ -252,7 +289,7 @@ A quick match downloads about 2.2 MB the first time a visitor plays Expert, and 
 
 - Against Slumbot, an independent and much more heavily trained bot, the rematch win (+45.7 ± 47.1 bb/100) is a small sample and only just clears zero after the all-in adjustment. It shows the Expert roughly holds its own, not that it is stronger.
 - Live solving shows no significant head-to-head gain over the blueprint alone. Its measured benefit is robustness against LBR.
-- The deep blueprints are under-trained, and that shows in the convergence estimates above.
+- The deep blueprints are still far from converged, even after the longer runs (abstract estimates of 548 to 822 mbb/hand), and their coarse turn and river abstraction now limits them more than training time does.
 - 100bb head-to-head samples are small.
 - The solver uses estimated ranges and a small set of bet sizes, and has no safety guarantee.
 - No AIVAT. Duplicate deals reduce variance, but far less than AIVAT would.

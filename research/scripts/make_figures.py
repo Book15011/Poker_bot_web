@@ -223,11 +223,13 @@ def training():
                     markeredgewidth=2 * PX, zorder=3, label='First run' if i == 0 else None)
             ax.plot([b], [i], 'o', color=longer, markersize=9 * PX, markeredgecolor=t['surface'],
                     markeredgewidth=2 * PX, zorder=3, label='Longer run' if i == 0 else None)
-            ax.text(max(a, b) + 12, i, f"{r['first']['iterationsB']:.1f}B to {r['long']['iterationsB']:.1f}B iterations",
+            ax.text(max(a, b) + 10, i, f"{r['first']['iterationsB']:.1f}B to {r['long']['iterationsB']:.1f}B iterations",
                     va='center', fontsize=9, color=t['ink2'])
         ax.set_yticks(range(len(rows)))
         ax.set_yticklabels([f"{r['depth']}bb" for r in rows], color=t['ink'])
-        ax.set_xlim(0, max(max(r['first']['exploitability'], r['long']['exploitability']) for r in rows) * 1.45)
+        lo = min(min(r['first']['exploitability'], r['long']['exploitability']) for r in rows)
+        hi = max(max(r['first']['exploitability'], r['long']['exploitability']) for r in rows)
+        ax.set_xlim(100 * (lo // 100) - 100, hi + (hi - lo) * .75)  # dots, not bars: no zero baseline needed
         ax.set_xlabel('Abstract exploitability estimate, mbb/hand (lower is better)', color=t['ink2'])
         ax.legend(loc='lower right', frameon=False, fontsize=9, labelcolor=t['ink'])
         titles(fig, t, 'Longer training of the deep-stack blueprints',

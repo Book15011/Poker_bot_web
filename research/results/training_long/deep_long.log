@@ -1,0 +1,9 @@
+2026-11-06T05:05:26Z resume depth=200bb minutes=360 data=data_deep
+2026-11-06T11:11:53Z done depth=200bb iterations=10702.8M abstract_exploitability_estimate=805.6 mbb/hand (samples=40000000) | A vs B: 62.95 mbb/hand +- 1.49 (1 s.e.), duplicate pairs
+2026-11-06T11:11:53Z resume depth=100bb minutes=300 data=data_deep
+2026-11-06T16:16:52Z done depth=100bb iterations=14824.3M abstract_exploitability_estimate=822.3 mbb/hand (samples=40000000) | A vs B: 37.22 mbb/hand +- 1.10 (1 s.e.), duplicate pairs
+2026-11-06T16:16:52Z resume depth=50bb minutes=150 data=data_deep
+2026-11-06T16:50:52Z rematch new finished
+2026-11-06T18:49:57Z done depth=50bb iterations=10979.1M abstract_exploitability_estimate=547.6 mbb/hand (samples=40000000) | A vs B: 31.76 mbb/hand +- 0.81 (1 s.e.), duplicate pairs
+2026-11-06T18:49:57Z ALL DONE 200:360 100:300 50:150
+2026-11-06T19:10:30Z long bench finished
