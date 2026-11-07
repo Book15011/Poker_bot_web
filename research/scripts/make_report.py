@@ -42,6 +42,7 @@ bench = [r for r in read_jsonl('round*.jsonl')]
 hands_rows = [r for r in bench if r.get('format') != 'quick']
 quick_rows = [r for r in bench if r.get('format') == 'quick']
 quick10_rows = [r for r in read_jsonl('quick10.jsonl') if r.get('format') == 'quick10']
+quick50_rows = [r for r in read_jsonl('quick50.jsonl') if r.get('format') == 'quick50']
 
 groups = {}
 for r in hands_rows:
@@ -49,7 +50,7 @@ for r in hands_rows:
 
 sections = []
 total_hands = (sum(r['hands'] for r in hands_rows) + sum(round(r['handsPerMatch'] * r['matches']) for r in quick_rows)
-               + sum(r['handsPerMatch'] * r['matches'] for r in quick10_rows))
+               + sum(r['handsPerMatch'] * r['matches'] for r in quick10_rows) + sum(r.get('hands', 0) for r in quick50_rows))
 latencies = []
 for r in hands_rows:
     if r['nameA'] == 'expert':
@@ -72,7 +73,26 @@ for fmt in sorted({k[2] for k in groups}, key=lambda x: int(x)):
         'note': 'Blueprint only is the same trained model with no live solving, the most direct measure of what the solver adds. The other opponents are hand-written and were never used in training.',
     })
 
-# Quick matches in the site's format: 10 hands, stacks reset every hand, duplicate pairs of matches
+# Quick matches in the site's format: up to 10 hands, 50bb that carry over, duplicate pairs of matches
+q50 = {}
+for r in quick50_rows:
+    q50.setdefault(r['nameB'], []).append(r)
+if q50:
+    tr = []
+    for b, rs in sorted(q50.items(), key=lambda kv: -sum(r['winRate'] * r['matches'] for r in kv[1]) / sum(r['matches'] for r in kv[1])):
+        n = sum(r['matches'] for r in rs)
+        p = sum(r['winRate'] * r['matches'] for r in rs) / n
+        ci = math.sqrt(sum((r['ci95'] * r['matches'] / n) ** 2 for r in rs))
+        chips = sum(r['chipsPerMatch'] * r['matches'] for r in rs) / n
+        early = sum(r['endedEarly'] for r in rs)
+        tr.append([OPPONENT_NAMES.get(b, b), f'{n:,}', f'{100 * p:.1f}%', f'±{100 * ci:.1f}', f'{chips / 100:+.1f}', f'{100 * early / n:.0f}%'])
+    sections.append({
+        'title': 'Whole quick matches: up to 10 hands, 50 big blinds',
+        'text': 'This is the format on the site: 5,000 chips each (50 big blinds) that carry over, a player who runs out loses at once, and otherwise the one with more chips after 10 hands wins. Matches were played in pairs with the same cards and the seats swapped. A draw counts as half a win.',
+        'table': {'headers': ['Expert against', '#Matches', '#Expert wins', '#95% CI', '#Big blinds per match', '#Ended early'], 'rows': tr},
+    })
+
+# An earlier 10-hand version: 20bb reset every hand
 q10 = {}
 for r in quick10_rows:
     q10.setdefault(r['nameB'], []).append(r)
@@ -86,8 +106,8 @@ if q10:
         draws = sum(r['draws'] for r in rs)
         tr.append([OPPONENT_NAMES.get(b, b), f'{n:,}', f'{100 * p:.1f}%', f'±{100 * ci:.1f}', f'{chips / 100:+.1f}', f'{draws:,}'])
     sections.append({
-        'title': 'Whole quick matches: 10 hands',
-        'text': 'This is the format on the site: 10 hands, both players starting every hand with 20 big blinds, and the winner is whoever has won more chips. Matches were played in pairs with the same cards and the seats swapped. A draw counts as half a win. Ten hands carry a lot of luck, so even a much stronger player loses some matches.',
+        'title': 'Earlier 10-hand version: 20 big blinds, reset every hand',
+        'text': 'Briefly on the site: 10 hands, both players starting every hand with 20 big blinds, and the winner is whoever has won more chips.',
         'table': {'headers': ['Expert against', '#Matches', '#Expert wins', '#95% CI', '#Big blinds per match', '#Draws'], 'rows': tr},
     })
 

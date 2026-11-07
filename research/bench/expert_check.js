@@ -3,9 +3,10 @@
 //   node expert_check.js <bpDir> <dataDir> <a> <b> <format> <count> <seed> [turnIters] [riverIters]
 //
 // a, b:   expert | blueprint | random | station | casual | tight | lag | equity | strong | maniac | minraiser | shover
-// format: a stack depth in big blinds (duplicate hands, count = pairs of hands), "quick10" (the site's quick match:
-//         10 hands at 20bb with stacks reset every hand; count = pairs of matches), or "quick" (the earlier
-//         first-to-3,000 format with rising blinds; count = matches)
+// format: a stack depth in big blinds (duplicate hands, count = pairs of hands), "quick50" (the site's quick match:
+//         10 hands, 50bb that carry over, running out of chips ends it; count = pairs of matches), "quick10" (an
+//         earlier 10-hand version with 20bb reset every hand), or "quick" (the first-to-3,000 format with rising
+//         blinds; count = matches)
 //
 // blueprint means the trained tables on every street with no live solving. It needs bp_<d>_full.bin.
 import { readFileSync, readdirSync } from 'node:fs';
@@ -80,7 +81,9 @@ const makers = {
 };
 const a = await makers[nameA](seed), b = await makers[nameB](seed + 100);
 const t0 = Date.now();
-const r = format === 'quick10'
+const r = format === 'quick50'
+  ? await runFixedMatches(() => a, () => b, { pairs: count, seed: 7000 + seed, stack: 5000, carry: true })
+  : format === 'quick10'
   ? await runFixedMatches(() => a, () => b, { pairs: count, seed: 7000 + seed })
   : format === 'quick'
   ? await runQuickMatches(() => a, () => b, { matches: count, seed: 5000 + seed })

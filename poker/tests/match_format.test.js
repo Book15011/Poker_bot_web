@@ -16,26 +16,30 @@ test('all-in equity: exact on the turn and flop, close preflop', () => {
   assert.ok(Math.abs(e - 0.82) < 0.012, `AA vs KK came out at ${e}`);
 });
 
-test('the quick match is ten hands, and every hand starts from fresh stacks', () => {
+test('the quick match: 50 big blinds that carry over, 10 hands, and running out of chips ends it', () => {
   const f = FORMATS.quick;
   assert.equal(f.handsInMatch, 10);
-  assert.equal(f.resetStacks, true);
-  const m = new Match({ startingStack: f.startingStack, blinds: f.blinds, resetStacks: true });
+  assert.ok(!f.resetStacks, 'chips carry over');
+  assert.equal(f.startingStack / f.blinds[0].big, 50);
   const rng = seededRng(7);
-  let score = 0;
-  for (let i = 0; i < f.handsInMatch; i++) {
-    const h = m.nextHand(shuffledDeck(rng.int));
-    assert.deepEqual([h.stacks[0] + h.totals[0], h.stacks[1] + h.totals[1]], [f.startingStack, f.startingStack]);
-    // Shove and call every hand: the biggest swing the format allows.
-    while (!h.finished) {
-      const l = h.legalActions();
-      m.act(l.canRaise ? { type: 'raise', to: l.maxRaiseTo } : l.canCall ? { type: 'call' } : { type: 'check' });
+  let endedEarly = 0;
+  for (let g = 0; g < 40; g++) {
+    const m = new Match({ startingStack: f.startingStack, blinds: f.blinds });
+    let prev = [f.startingStack, f.startingStack];
+    while (m.winner() === null && m.handNumber < f.handsInMatch) {
+      const h = m.nextHand(shuffledDeck(rng.int));
+      assert.deepEqual([h.stacks[0] + h.totals[0], h.stacks[1] + h.totals[1]], prev, 'each hand starts where the last one ended');
+      // Shove and call every hand: the most violent way to play the format.
+      while (!h.finished) {
+        const l = h.legalActions();
+        m.act(l.canRaise ? { type: 'raise', to: l.maxRaiseTo } : l.canCall ? { type: 'call' } : { type: 'check' });
+      }
+      assert.equal(m.stacks[0] + m.stacks[1], 2 * f.startingStack, 'chips are conserved');
+      prev = [m.stacks[0], m.stacks[1]];
     }
-    const r = /** @type {any} */ (h.result);
-    assert.equal(r.net[0] + r.net[1], 0, 'chips are conserved');
-    assert.ok(Math.abs(r.net[0]) <= f.startingStack, 'one hand swings the score by at most one stack');
-    score += r.net[0];
+    if (m.winner() !== null) endedEarly++;
+    assert.ok(m.handNumber <= f.handsInMatch);
   }
-  assert.equal(m.handNumber, 10);
-  assert.ok(Math.abs(score) <= 10 * f.startingStack);
+  // With equal stacks, the first shove-and-call decides it, so every one of these ends early.
+  assert.equal(endedEarly, 40);
 });

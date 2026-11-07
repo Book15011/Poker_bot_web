@@ -64,9 +64,11 @@ What this shows:
 
 ## Quick matches
 
-The site's quick match is now exactly 10 hands: both players start every hand with 2,000 chips (20 big blinds), and whoever has won more chips after hand 10 wins. It replaced the earlier format below, where one early all-in could end a match in two or three hands.
+The site's quick match is up to 10 hands with 5,000 chips each (50 big blinds) that carry over, like money. A player who runs out of chips loses at once; otherwise whoever has more chips after hand 10 wins. Deeper stacks make an early knockout much less likely than at 20 big blinds, because nobody is forced all in. Results for this format are being measured.
 
-`research/bench/arena.js` (`runFixedMatches`) plays the format exactly: duplicate pairs of matches with the same ten decks and the seats swapped, the Expert at the site's base solve length (80 turn and 400 river iterations), 80 pairs per job and four seeds per opponent (`research/results/quick10.jobs`). A draw counts as half a win.
+### Earlier 10-hand version: 20 big blinds, reset every hand
+
+For a short time the quick match reset both stacks to 2,000 chips every hand. `research/bench/arena.js` (`runFixedMatches`) plays it exactly: duplicate pairs of matches with the same ten decks and the seats swapped, the Expert at the site's base solve length (80 turn and 400 river iterations), 80 pairs per job and four seeds per opponent (`research/results/quick10.jobs`). A draw counts as half a win.
 
 | Expert against | Matches | Expert wins | 95% CI | Big blinds won per match |
 |---|---|---|---|---|

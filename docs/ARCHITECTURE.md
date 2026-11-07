@@ -100,7 +100,7 @@ Portfolio integration costs almost nothing until someone asks for it. `quant.htm
 
 ## Match formats
 
-- **Quick match:** exactly 10 hands at 50/100 blinds. Both players start every hand with 2,000 chips (20 big blinds), and whoever has won more chips after hand 10 wins. This is the default, built for someone taking a short break from reading a CV. It replaced a first-to-3,000-chips format with rising blinds, where one early all-in could end the match in two or three hands.
+- **Quick match:** up to 10 hands at 50/100 blinds, with 5,000 chips each (50 big blinds) that carry over from hand to hand. A player who runs out of chips loses at once; otherwise whoever has more chips after hand 10 wins. This is the default, built for someone taking a short break from reading a CV. It replaced a first-to-3,000-chips format at 20 big blinds with rising blinds, where one early all-in could end the match in two or three hands, and briefly a 10-hand version that reset 20 big blind stacks every hand.
 - **Luck check:** at the end of a match, each hand that was decided by an all-in before the river is also scored at its expected value: the pot times the player's equity when the chips went in, minus their half (`allInEquity` in `poker/js/ui/game.js`, exact with one or two cards to come, 30,000 sampled runouts preflop). The end screen shows how much of the result came from those runouts.
 - **Deep stacks:** 100 big blinds each, flat blinds, play until someone is out of chips. This is the serious mode.
 

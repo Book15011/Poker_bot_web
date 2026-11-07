@@ -107,24 +107,27 @@ export async function runQuickMatches(makeA, makeB, { matches, seed }) {
 }
 
 /**
- * The site's quick match: a fixed number of hands, both stacks reset to `stack` every hand, and whoever has won
- * more chips at the end takes the match (a draw scores half). Matches come in duplicate pairs, the same decks
- * with the seats swapped, and the interval is over pairs.
+ * A fixed-length match: up to `hands` hands, and whoever has won more chips at the end takes it (a draw scores
+ * half). With `carry`, chips carry over and a player who runs out loses at once (the site's quick match);
+ * without it, both stacks reset to `stack` every hand. Matches come in duplicate pairs, the same decks with the
+ * seats swapped, and the interval is over pairs.
  */
-export async function runFixedMatches(makeA, makeB, { pairs, seed, hands = 10, stack = 2000, smallBlind = 50, bigBlind = 100 }) {
+export async function runFixedMatches(makeA, makeB, { pairs, seed, hands = 10, stack = 2000, smallBlind = 50, bigBlind = 100, carry = false }) {
   const a = makeA(), b = makeB();
   const rng = seededRng(seed);
   const pairScores = [];
-  let chips = 0, wins = 0, draws = 0;
+  let chips = 0, wins = 0, draws = 0, busts = 0;
   for (let p = 0; p < pairs; p++) {
     const decks = Array.from({ length: hands }, () => shuffledDeck(rng.int));
     let pairScore = 0;
     for (const aSeat of [0, 1]) {
       const players = aSeat === 0 ? [a, b] : [b, a];
-      let net = 0;
+      let net = 0, stacks = [stack, stack];
       for (let i = 0; i < hands; i++) {
-        const hand = await playHand(players[0], players[1], { stacks: [stack, stack], smallBlind, bigBlind, button: i % 2, deck: decks[i] });
-        net += hand.stacks[aSeat] - stack;
+        const hand = await playHand(players[0], players[1], { stacks: carry ? stacks : [stack, stack], smallBlind, bigBlind, button: i % 2, deck: decks[i] });
+        net += hand.stacks[aSeat] - (carry ? stacks[aSeat] : stack);
+        stacks = [hand.stacks[0], hand.stacks[1]];
+        if (carry && (stacks[0] <= 0 || stacks[1] <= 0)) { busts++; break; }
       }
       chips += net;
       if (net > 0) wins++; else if (net === 0) draws++;
@@ -135,7 +138,7 @@ export async function runFixedMatches(makeA, makeB, { pairs, seed, hands = 10, s
   const mean = pairScores.reduce((x, y) => x + y, 0) / pairs;
   const sd = Math.sqrt(pairScores.reduce((x, y) => x + (y - mean) ** 2, 0) / Math.max(1, pairs - 1));
   return { a: a.name, b: b.name, matches: 2 * pairs, wins, draws, winRate: mean, ci95: (1.96 * sd) / Math.sqrt(pairs),
-    chipsPerMatch: chips / (2 * pairs), handsPerMatch: hands, seed };
+    chipsPerMatch: chips / (2 * pairs), handsPerMatch: hands, endedEarly: busts, stack, carry, seed };
 }
 
 const role = (/** @type {{sum:number,n:number}} */ r, /** @type {(x:number)=>number} */ f) => (r.n ? f(r.sum / r.n) : 0);
