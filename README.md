@@ -19,7 +19,7 @@ Plain-language version: [AI_EXPLAINED.md](docs/AI_EXPLAINED.md). Design and code
 
 ## Results
 
-191,178 evaluated hands, with duplicate deals and 95% confidence intervals. All details and limitations are in [BENCHMARKS.md](docs/BENCHMARKS.md).
+200,778 evaluated hands, with duplicate deals and 95% confidence intervals. All details and limitations are in [BENCHMARKS.md](docs/BENCHMARKS.md).
 
 | Test | Result |
 |---|---|

@@ -4,7 +4,7 @@ Every number here was measured. Raw results are in [`research/results/`](../rese
 
 ## Summary
 
-191,178 hands were evaluated: 68,678 head-to-head, 112,000 against Local Best Response and 10,500 against Slumbot.
+200,778 hands were evaluated: 68,678 head-to-head, 112,000 against Local Best Response, 10,500 against Slumbot and 9,600 in 10-hand quick matches.
 
 - **Against the hand-written bots, the Expert wins, significantly at 20bb**: +21.5 ± 13.1 bb/100 against the Competitive bot on the site, and +18.1 ± 10.3 against Tight-passive. At 100bb every result is positive, but most intervals are still too wide.
 - **Local Best Response never beat it.** At 100bb and 200bb the Expert did measurably better against LBR than the same blueprint without live solving. That is the clearest evidence the solver earns its place: it makes the bot more robust, more than it wins extra chips from these opponents.
@@ -64,9 +64,21 @@ What this shows:
 
 ## Quick matches
 
-The site's quick match is now exactly 10 hands: both players start every hand with 2,000 chips (20 big blinds), and whoever has won more chips after hand 10 wins. It replaced the format measured below, where one early all-in could end a match in two or three hands. Results for the 10-hand format are being measured.
+The site's quick match is now exactly 10 hands: both players start every hand with 2,000 chips (20 big blinds), and whoever has won more chips after hand 10 wins. It replaced the earlier format below, where one early all-in could end a match in two or three hands.
 
-The earlier format: 2,000 chips each, blinds rising every 5 hands, first to 3,000 wins.
+`research/bench/arena.js` (`runFixedMatches`) plays the format exactly: duplicate pairs of matches with the same ten decks and the seats swapped, the Expert at the site's base solve length (80 turn and 400 river iterations), 80 pairs per job and four seeds per opponent (`research/results/quick10.jobs`). A draw counts as half a win.
+
+| Expert against | Matches | Expert wins | 95% CI | Big blinds won per match |
+|---|---|---|---|---|
+| Tight-passive | 320 | 63.4% | ±4.6 | +2.3 |
+| Competitive (site bot) | 320 | 57.2% | ±4.3 | +2.8 |
+| Casual (site bot) | 320 | 56.9% | ±4.7 | +4.6 |
+
+The Expert wins every matchup, but only 57 to 63% of single matches. That follows from its edge: about 0.2 to 0.5 big blinds per hand, against hand-to-hand swings of several big blinds, so ten hands are mostly luck. The longer format doesn't raise the Expert's match win rate. Against Casual and Tight-passive the change from the earlier format is within noise. Against Competitive it fell from 65.8% to 57.2%, which is more than noise. A likely reason is that the earlier format's rising blinds pushed stacks short, where that bot's simple rules are weakest. What the new format changes is that no match ends early on one all-in. The end screen's luck check scores all-in hands at their expected value, which removes the largest single source of luck. It can't remove the luck of which cards were dealt.
+
+### Earlier format
+
+2,000 chips each, blinds rising every 5 hands, first to 3,000 wins.
 
 | Expert against | Matches | Expert wins | 95% CI | Hands per match |
 |---|---|---|---|---|
