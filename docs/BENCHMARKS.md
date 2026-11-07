@@ -64,7 +64,17 @@ What this shows:
 
 ## Quick matches
 
-The site's quick match is up to 10 hands with 5,000 chips each (50 big blinds) that carry over, like money. A player who runs out of chips loses at once; otherwise whoever has more chips after hand 10 wins. Deeper stacks make an early knockout much less likely than at 20 big blinds, because nobody is forced all in. Results for this format are being measured.
+The site's quick match is up to 10 hands with 5,000 chips each (50 big blinds) that carry over, like money. A player who runs out of chips loses at once; otherwise whoever has more chips after hand 10 wins. Deeper stacks make an early knockout much less likely than at 20 big blinds, because nobody is forced all in.
+
+Measured the same way as below (`runFixedMatches` with chips carried over, duplicate pairs, the Expert at 80 turn and 400 river iterations, `research/results/quick50.jobs`):
+
+| Expert against | Matches | Expert wins | 95% CI | Big blinds won per match | Ended early by a knockout |
+|---|---|---|---|---|---|
+| Tight-passive | 320 | 67.3% | ±4.8 | +1.1 | 6% |
+| Competitive (site bot) | 320 | 57.0% | ±4.8 | +1.7 | 11% |
+| Casual (site bot) | 320 | 57.2% | ±4.6 | +5.9 | 38% |
+
+Most matches now run the full 10 hands. Casual is the exception: it calls all-ins with weak hands, so 38% of its matches end in a knockout, and those are close to coin flips even though the Expert wins the most chips against it. Match win rates are about the same as in the other formats, 57 to 67%, because ten hands are still a small sample. The format's job is to stop one early all-in from deciding the match, and the luck check shows how much of a result came from all-in runouts.
 
 ### Earlier 10-hand version: 20 big blinds, reset every hand
 
