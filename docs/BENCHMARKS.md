@@ -64,7 +64,9 @@ What this shows:
 
 ## Quick matches
 
-The format on the site: 2,000 chips each, blinds rising every 5 hands, first to 3,000 wins.
+The site's quick match is now exactly 10 hands: both players start every hand with 2,000 chips (20 big blinds), and whoever has won more chips after hand 10 wins. It replaced the format measured below, where one early all-in could end a match in two or three hands. Results for the 10-hand format are being measured.
+
+The earlier format: 2,000 chips each, blinds rising every 5 hands, first to 3,000 wins.
 
 | Expert against | Matches | Expert wins | 95% CI | Hands per match |
 |---|---|---|---|---|

@@ -3,7 +3,9 @@
 //   node expert_check.js <bpDir> <dataDir> <a> <b> <format> <count> <seed> [turnIters] [riverIters]
 //
 // a, b:   expert | blueprint | random | station | casual | tight | lag | equity | strong | maniac | minraiser | shover
-// format: a stack depth in big blinds (duplicate hands, count = pairs of hands), or "quick" (count = matches)
+// format: a stack depth in big blinds (duplicate hands, count = pairs of hands), "quick10" (the site's quick match:
+//         10 hands at 20bb with stacks reset every hand; count = pairs of matches), or "quick" (the earlier
+//         first-to-3,000 format with rising blinds; count = matches)
 //
 // blueprint means the trained tables on every street with no live solving. It needs bp_<d>_full.bin.
 import { readFileSync, readdirSync } from 'node:fs';
@@ -14,7 +16,7 @@ import { RealtimeSolver } from '../../poker/js/ai/realtime.js';
 import { loadSolverCore } from '../../poker/js/ai/solver.js';
 import { seededRng } from '../../poker/js/engine/cards.js';
 import { loadBlueprint, loadBuckets } from './node_models.js';
-import { runMatch, runQuickMatches } from './arena.js';
+import { runMatch, runQuickMatches, runFixedMatches } from './arena.js';
 
 const [bpDir, dataDir, nameA, nameB, format, countArg, seedArg, turnArg, riverArg] = process.argv.slice(2);
 const count = Number(countArg), seed = Number(seedArg || 1);
@@ -78,7 +80,9 @@ const makers = {
 };
 const a = await makers[nameA](seed), b = await makers[nameB](seed + 100);
 const t0 = Date.now();
-const r = format === 'quick'
+const r = format === 'quick10'
+  ? await runFixedMatches(() => a, () => b, { pairs: count, seed: 7000 + seed })
+  : format === 'quick'
   ? await runQuickMatches(() => a, () => b, { matches: count, seed: 5000 + seed })
   : await runMatch(() => a, () => b, { pairs: count, seed: 1000 + seed, stackBB: Number(format) });
 console.log(JSON.stringify({ ...r, nameA, nameB, format, turnIters, riverIters, seconds: (Date.now() - t0) / 1000 }));

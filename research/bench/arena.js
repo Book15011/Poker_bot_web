@@ -106,5 +106,37 @@ export async function runQuickMatches(makeA, makeB, { matches, seed }) {
   return { a: a.name, b: b.name, matches, wins, winRate: p, ci95: 1.96 * Math.sqrt((p * (1 - p)) / matches), handsPerMatch: totalHands / matches, seed };
 }
 
+/**
+ * The site's quick match: a fixed number of hands, both stacks reset to `stack` every hand, and whoever has won
+ * more chips at the end takes the match (a draw scores half). Matches come in duplicate pairs, the same decks
+ * with the seats swapped, and the interval is over pairs.
+ */
+export async function runFixedMatches(makeA, makeB, { pairs, seed, hands = 10, stack = 2000, smallBlind = 50, bigBlind = 100 }) {
+  const a = makeA(), b = makeB();
+  const rng = seededRng(seed);
+  const pairScores = [];
+  let chips = 0, wins = 0, draws = 0;
+  for (let p = 0; p < pairs; p++) {
+    const decks = Array.from({ length: hands }, () => shuffledDeck(rng.int));
+    let pairScore = 0;
+    for (const aSeat of [0, 1]) {
+      const players = aSeat === 0 ? [a, b] : [b, a];
+      let net = 0;
+      for (let i = 0; i < hands; i++) {
+        const hand = await playHand(players[0], players[1], { stacks: [stack, stack], smallBlind, bigBlind, button: i % 2, deck: decks[i] });
+        net += hand.stacks[aSeat] - stack;
+      }
+      chips += net;
+      if (net > 0) wins++; else if (net === 0) draws++;
+      pairScore += (net > 0 ? 1 : net < 0 ? 0 : 0.5) / 2;
+    }
+    pairScores.push(pairScore);
+  }
+  const mean = pairScores.reduce((x, y) => x + y, 0) / pairs;
+  const sd = Math.sqrt(pairScores.reduce((x, y) => x + (y - mean) ** 2, 0) / Math.max(1, pairs - 1));
+  return { a: a.name, b: b.name, matches: 2 * pairs, wins, draws, winRate: mean, ci95: (1.96 * sd) / Math.sqrt(pairs),
+    chipsPerMatch: chips / (2 * pairs), handsPerMatch: hands, seed };
+}
+
 const role = (/** @type {{sum:number,n:number}} */ r, /** @type {(x:number)=>number} */ f) => (r.n ? f(r.sum / r.n) : 0);
 const avg = (/** @type {number[]} */ a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0);

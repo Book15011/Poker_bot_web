@@ -161,7 +161,7 @@ test('the expert keeps solving on the opponent\'s time without changing what it 
   assert.ok(checked > 0, 'the pinned-decision check ran');
 });
 
-test('a whole quick match always finishes with one player over the goal or out of chips', () => {
+test('a chip-goal match with rising blinds always finishes with one player over the goal or out of chips', () => {
   const rng = seededRng(404);
   const blinds = [[50, 100], [75, 150], [100, 200], [150, 300], [200, 400], [300, 600], [400, 800], [500, 1000]].map(([small, big]) => ({ small, big }));
   const lengths = [];
@@ -178,6 +178,6 @@ test('a whole quick match always finishes with one player over the goal or out o
     lengths.push(m.handNumber);
   }
   const avg = lengths.reduce((a, b) => a + b, 0) / lengths.length;
-  console.log(`average quick match length: ${avg.toFixed(1)} hands, longest ${Math.max(...lengths)}`);
-  assert.ok(avg < 25, 'a quick match stays quick');
+  console.log(`average chip-goal match length: ${avg.toFixed(1)} hands, longest ${Math.max(...lengths)}`);
+  assert.ok(avg < 25, 'a chip-goal match stays short');
 });
